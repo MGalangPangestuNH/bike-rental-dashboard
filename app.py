@@ -3,49 +3,44 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Load Data
-@st.cache_data
-def load_data():
-    df_day = pd.read_csv("D:\submission\data\day.csv")
-    df_hour = pd.read_csv("D:\submission\data\hour.csv")
-    return df_day, df_hour
+# Membaca dataset
+df = pd.read_csv("D:\submission\dashboard\main_data.csv")
 
-df_day, df_hour = load_data()
+# Judul Dashboard
+st.title("Dashboard Penyewaan Sepeda")
+st.write("Analisis data penyewaan sepeda berdasarkan musim dan waktu.")
 
-# Title
-st.title("📊 Dashboard Analisis Penyewaan Sepeda")
+# Menampilkan data awal
+st.subheader("Data Awal")
+st.write(df.head())
 
-# Sidebar Filter
-season_mapping = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
-selected_season = st.sidebar.selectbox("Pilih Musim", list(season_mapping.values()))
+# Statistik Deskriptif
+st.subheader("Statistik Deskriptif")
+st.write(df.describe())
 
-# Konversi nama musim ke angka
-selected_season_num = list(season_mapping.keys())[list(season_mapping.values()).index(selected_season)]
+# Visualisasi: Distribusi Penyewaan Sepeda Berdasarkan Musim
+st.subheader("Distribusi Penyewaan Sepeda Berdasarkan Musim")
+plt.figure(figsize=(8, 5))
+sns.barplot(x='season', y='cnt_day', data=df, palette="Blues")
+plt.xlabel("Musim")
+plt.ylabel("Total Penyewaan")
+plt.title("Pola Penyewaan Sepeda Berdasarkan Musim")
+st.pyplot()
 
-# 1️⃣ Visualisasi: Pola Penyewaan Berdasarkan Musim
-st.subheader("Pola Penyewaan Sepeda Berdasarkan Musim")
-season_data = df_day[df_day['season'] == selected_season_num]
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.barplot(x='season', y='cnt', data=season_data, palette="Blues", ax=ax)
-ax.set_xlabel("Musim")
-ax.set_ylabel("Total Penyewaan")
-ax.set_title(f"Penyewaan Sepeda Selama {selected_season}")
-st.pyplot(fig)
+# Visualisasi: Korelasi Antar Fitur
+st.subheader("Korelasi Antar Fitur")
 
-# 2️⃣ Visualisasi: Tren Penyewaan Sepeda per Jam
-st.subheader("Tren Penyewaan Sepeda per Jam")
-df_hour_grouped = df_hour.groupby('hr')['cnt'].mean().reset_index()
+# Menghapus kolom non-numerik sebelum menghitung korelasi
+numeric_df = df.select_dtypes(include=['number'])  # Hanya memilih kolom numerik
+correlation_matrix = numeric_df.corr()
 
-fig, ax = plt.subplots(figsize=(10, 5))
-sns.lineplot(x='hr', y='cnt', data=df_hour_grouped, marker='o', color="blue", ax=ax)
-ax.set_xlabel("Jam dalam Sehari")
-ax.set_ylabel("Rata-rata Penyewaan Sepeda")
-ax.set_title("Rata-rata Penyewaan Sepeda per Jam")
-st.pyplot(fig)
+plt.figure(figsize=(10, 6))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f')
+plt.title("Korelasi Antar Fitur")
+st.pyplot()
 
-# Insight
-st.markdown("### 🔍 Insight")
-st.markdown("""
-1. **Penyewaan sepeda memiliki pola musiman** – Pada musim panas dan gugur, jumlah penyewaan lebih tinggi dibandingkan musim lainnya.
-2. **Pola waktu harian menunjukkan lonjakan pada jam sibuk** – Penyewaan sepeda meningkat signifikan pada pagi (07:00-09:00) dan sore (17:00-19:00), kemungkinan karena jam kerja dan pulang kantor.
-""")
+# Pilihan interaktif untuk filter data berdasarkan musim
+st.subheader("Filter Data Berdasarkan Musim")
+season_filter = st.selectbox("Pilih Musim", df['season'].unique())
+filtered_df = df[df['season'] == season_filter]
+st.write(f"Data Penyewaan Sepeda untuk Musim {season_filter}", filtered_df)
