@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Membaca dataset
-df = pd.read_csv("/data/main_data.csv")
+df = pd.read_csv("data/main_data.csv")
 
 # Judul dashboard
 st.title("Dashboard Analisis Penyewaan Sepeda")
