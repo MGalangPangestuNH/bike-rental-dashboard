@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load Data
-df = pd.read_csv("main_data.csv")
+df = pd.read_csv("data/main_data.csv")
 
 # Konversi ke tipe data yang sesuai
 df['dteday'] = pd.to_datetime(df['dteday'])
